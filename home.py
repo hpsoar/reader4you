@@ -29,11 +29,24 @@ def logout():
   flash('You were logged out')
   return redirect(url_for('login'))
 
+@app.route('/add_feed', methods=['POST'])
+def add_feed():
+  print request.form['feed_url']
+  return redirect(url_for('home'))
+
 @app.route('/')
 def home():
   if not session.get('logged_in', None):
     return render_template('login.html')
-  return render_template('home.html')
+  feedList = [ {
+      'name': 'test0',
+      'url': 'http://www.qq.com'
+    },
+    {
+      'name': 'test1',
+      'url': 'http://www.baidu.com'
+      }];
+  return render_template('home.html', feedList=feedList)
 
 if __name__ == '__main__':
   SERVER_NAME = '127.0.0.1'

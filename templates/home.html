@@ -17,6 +17,15 @@
     #content p {
       line-height: 30px;
     }
+    .inputFeedUrlNormal {
+      width: 162px;
+    }
+    .inputFeedUrlFocused {
+      width: 300px;
+    }
+    .feedItem {
+      width: 150px;
+    }
   </style>
 {% endblock %}
 {% block content %}
@@ -43,7 +52,13 @@
     </div>
     <div id='content' class='row-fluid'>
       <div class='span2 sidebar'>
-        <h2>Leftbar</h2>
+        <h2>My Feeds</h2>
+        <ul class="nav nav-tabs nav-stacked">
+          <li><div><form method=post action="{{ url_for('add_feed') }}"><input type=text name="feed_url" placeholder="feed url" class="inputFeedUrlNormal"><input type=submit text='add'></form></div></li>
+          {% for feed in feedList %}
+          <li><a href='{{ feed.url }}' class='feedItem'>{{ feed.name }}</a></li>
+          {% endfor %}
+        </ul>
       </div>
       <div class='span7 main'>
         <h2>Main Content Section</h2>
