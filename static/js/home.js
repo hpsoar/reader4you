@@ -4,12 +4,15 @@ $(function() {
         $.getJSON($SCRIPT_ROOT + '/add_feed', {
           feed_url: $('#feed_url').val()
         }, function(data) {
-          if (data) {
-            util.addToFeedList(data);
-            util.showItems(data.title, data.articles)
+          if (data.state == 'ok') {
+            util.addToFeedList(data.feed);
+            util.showItems(data.feed, data.articles)
+          }
+          else if (data.state == 'duplication') {
+            alert('already added!');
           }
           else {
-            alert('error')
+            alert('error');
           }
           $('#feed_url').val('');
         });
@@ -17,19 +20,30 @@ $(function() {
       clearItems: function() {
         $('#itemlist').html('');
       },
-      itemHtml: '<div><div><h4>${title}</h4></div>' +
-                  '<div>${author, date...}</div>' +
-                '<div>${description}</div></div>',
-      addItem: function(item) {
-        // use a template
-        var itemView = $(util.itemHtml.replace('${title}', item.title)
-                .replace('${description}', item.description));
-        itemView.attr('class', 'article_summary0');
-        itemView.appendTo($('#itemlist'));
+      itemView: function(item) {
+        // TODO: find all in ${}, replace with corresponding field in item
+        // create document node
       },
-      showItems: function(title, items) {
+      itemHtml: '<div class=article_summary_view>' +
+                  '<div class=title>' + 
+                      '<a class=link href=${link} >${title}</a>' +
+                      '<span class=pubdate>${published}</span>' +
+                  '</div>' +
+                  '<div class=author>${author}</div>' +
+                  '<div>${description}</div>' + 
+                '</div>',
+      addItem: function(item) {
+        // TODO: use a template
+        $(util.itemHtml.replace('${title}', item.title)
+                       .replace('${link}', item.link)
+                       .replace('${published}', item.published_parsed)
+                       .replace('${author}', item.author)
+                       .replace('${description}', item.description))
+        .appendTo($('#itemlist'));
+      },
+      showItems: function(feed, items) {
         util.clearItems();
-        $('#feedtitle').html(title);
+        $('#feedtitle').attr('href', feed.link).html(feed.title);
         $.each(items, function(index, item) {
           util.addItem(item);
         });
@@ -43,7 +57,7 @@ $(function() {
             $.getJSON($SCRIPT_ROOT + '/get_articles', {
               feed_id: feed.id
             }, function(data) {
-              util.showItems(feed.title, data.articles);
+              util.showItems(feed, data.articles);
             });
             return false;
           }
@@ -56,7 +70,7 @@ $(function() {
             util.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {
-            util.showItems(data.feedlist[0].title, data.articles);
+            util.showItems(data.feedlist[0], data.articles);
           }
         });
       },

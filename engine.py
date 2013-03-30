@@ -11,6 +11,8 @@ import da
 from tools import jsonify
 import urllib2
 import feedparser
+import time
+import datetime
 
 def default_rss(url):
   feed = { }
@@ -26,7 +28,8 @@ def default_item():
   item['title'] = ''
   item['description'] = ''
   item['author'] = ''
-  item['pubDate'] = ''
+  item['published'] = ''
+  item['published_parsed'] = datetime.datetime.utcnow()
   #item['title_features'] = { }
   #item['description_features'] = { }
   item['link'] = ''
@@ -35,25 +38,34 @@ def default_item():
 
 def parse_article(e):
   item = default_item()
-  item['title'] = e.title
 
   if 'summary' in e: item['description'] = e.summary
   else: item['description'] = e.description
 
-  if 'author' in e: item['author'] = e.author
-  if 'pubDate' in e: item['pubDate'] = e.pubDate
-  if 'link' in e: item['link'] = e.link
-  if 'guid' in e: item['guid'] = e.guid
+  if 'published_parsed' in e: item['published_parsed'] = datetime.datetime.fromtimestamp(time.mktime(e.published_parsed))
+
+  for key in item.keys():
+    if key == 'description' or key == 'published_parsed': continue
+    if key in e: item[key] = e[key]
+
+  #print e.published_parsed
+  #item['title'] = e.title
+  #if 'author' in e: item['author'] = e.author
+  #if 'created' in e: item['created'] = e.created
+  #if 'pubDate' in e: item['pubDate'] = e.pubDate
+  #if 'link' in e: item['link'] = e.link
+  #if 'guid' in e: item['guid'] = e.guid
   #item['title_features'] = extract_features(item['title'])
   #item['description_features'] = extract_features(item['description'])
   return item
 
-def parse_feed(url):
+def read(url):
   try:
-    content = urllib2.urlopen(url, timeout=2).read()
+    return urllib2.urlopen(url, timeout=2).read()
   except:
-    return None, None
+    return None
 
+def parse_feed(url, content):
   d = feedparser.parse(content)
   print d.feed
 
@@ -70,7 +82,24 @@ def parse_feed(url):
 
 
 def add_feed(user_id, url):
-  feed, articles = parse_feed(url)
+  """
+  add feed for user
+
+  return: @state 'ok'/'network error'/'duplication'
+          @feed feed information
+          @articles latested articles
+  """
+  state = 'ok'
+  if da.get_feed_id(user_id, url):
+    state = 'duplication'
+    return jsonify({'state': state})
+
+  content = read(url)
+  if not content:
+    state = 'network error'
+    return jsonify({'state': state })
+
+  feed, articles = parse_feed(url, content)
 
   if feed:
     feed['user_id'] = user_id
@@ -83,17 +112,41 @@ def add_feed(user_id, url):
       item['feed_id'] = feed['id']
       da.save_article(item)
     
-    # append articles
-    feed['articles'] = articles
-  return jsonify(feed)
+  return jsonify({ 'state': state, 'feed': feed, 'articles': articles })
 
 def get_feedlist(user_id):
   feedlist = da.get_feedlist(user_id)
   articles = []
-  if feedlist: articles = da.get_articles(feedlist[0]['id'])
+  state = 'ok'
+  if feedlist: 
+    state = update_feed(feedlist[0])
+    print feedlist
+    articles = da.get_articles(feedlist[0]['id'])
 
-  return jsonify({ 'feedlist': feedlist, 'articles': articles})
+  return jsonify({ 'state': state, 'feedlist': feedlist, 'articles': articles})
+
+def update_feed(feed):
+  state = 'ok'
+  content = read(feed['url'])
+  if not content:
+    state = 'network error'
+  newfeed, articles = parse_feed(feed['url'], content)
+  if newfeed:
+    for key in newfeed.keys():
+      feed[key] = newfeed[key]
+
+    for item in articles:
+      if da.get_article(feed['id'], item['link']): continue
+      item['id'] = da.gen_id('articles')
+      item['feed_id'] = feed['id']
+      da.save_article(item)
+
+  return state
 
 def get_articles(feed_id):
-  return jsonify({ 'articles': da.get_articles(feed_id) })
+  """
+    update article database, return all the articles for feed
+  """
+  state = update_feed(da.get_feed(feed_id))
+  return jsonify({ 'state': state, 'articles': da.get_articles(feed_id) })
 
