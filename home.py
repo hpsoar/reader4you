@@ -42,7 +42,7 @@ def add_feed():
 
 @app.route('/get_feedlist')
 def get_feedlist():
-  user_id = request.args.get('user_id')
+  user_id = session['user_id'] 
   return engine.get_feedlist(user_id)
 
 @app.route('/get_articles')
