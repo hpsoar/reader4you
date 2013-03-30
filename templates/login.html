@@ -34,7 +34,8 @@
 
     </style>
 {% endblock %}
-{% block content %}
+{% block body %}
+<body>
   <div class="container">
       <form class="form-signin" action="{{ url_for('login') }}" method=post>
         <h2 class="form-signin-heading">Please sign in</h2>
@@ -49,4 +50,5 @@
       </form>
 
     </div> <!-- /container -->
+  </body>
 {% endblock %}

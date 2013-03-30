@@ -31,17 +31,14 @@ $(function() {
         util.clearItems();
         $('#feedtitle').html(title);
         $.each(items, function(index, item) {
-            console.log(item);
           util.addItem(item);
         });
       },
       addToFeedList: function(feed) {
         $('<a>',{
           text: feed.title,
-          title: 'Blah',
           href: feed.link,
           class: 'feedItem',
-          target:'_blank',
           click: function(){ 
             $.getJSON($SCRIPT_ROOT + '/get_articles', {
               feed_id: feed.id
@@ -56,7 +53,6 @@ $(function() {
         $.getJSON($SCRIPT_ROOT + '/get_feedlist', {
         }, function(data) {
           $.each(data.feedlist, function(index, feed){
-            console.log(feed.id);
             util.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {

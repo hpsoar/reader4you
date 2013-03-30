@@ -2,7 +2,6 @@
 {% block head %}
   <style type='text/css'>
     body {
-      background-color: #CCC;
     }
     #content {
       background-color: #FFF;
@@ -16,26 +15,52 @@
     #content p {
       line-height: 30px;
     }
+    #content .sidebar a {
+    }
     .inputFeedUrlNormal {
-      width: 150px;
+      width: 200;
     }
     .inputFeedUrlFocused {
       width: 300px;
     }
     .feedItem {
-      width: 160;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
     }
     .article_summary0 {
-      margin: 0px 2px 2px 0px;
-      padding: 0px 4px 0px 4px;
+      padding: 12px 19px 19px;
+      margin: 0 auto 20px;
+      background-color: #fff;
+      border: 1px solid #e5e5e5;
+      -webkit-border-radius: 5px;
+         -moz-border-radius: 5px;
+              border-radius: 5px;
+      -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+              box-shadow: 0 1px 2px rgba(0,0,0,.05);
     }
+.sidebar-nav-fixed {
+    padding: 9px 0;
+    position:fixed;
+    left:20px;
+    top:60px;
+    width:250px;
+}
+
+.row-fluid > .span-fixed-sidebar {
+    margin-left: 290px;
+    margin-top: 10px;
+}
+    
   </style>
   <script type=text/javascript src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}
 
-{% block content %}
-  <div class="container" >
-    <div class='navbar navbar-inverse'>
+{% block body %}
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+  <div class="container">
+    <div class='navbar navbar-inverse navbar-fixed-top'>
       <div class='navbar-inner nav-collapse' style='height: auto;'>
         <ul class='nav'>
           <li class='active'><a href='#'>Home</a></li>
@@ -49,11 +74,13 @@
         </ul>
       </div>
     </div>
-    <div id='content' class='row-fluid'>
-      <div class='span2 sidebar'>
-        <div class='weel sidebar-nav'>
-        <h3>My Feeds</h3>
-        <ul id='feedlist' class="nav nav-tabs nav-stacked">
+  </div>
+  <div class="container-fluid" >
+    <div class='row-fluid row'>
+      <div class='span3 sidebar'>
+        <div class='well sidebar-nav-fixed'>
+          <ul id='feedlist' class="nav nav-list">
+          <li class="nav-header">My Feeds</li>
           <li><div>
             <input type=text id=feed_url placeholder="feed url" class="inputFeedUrlNormal">
           </div>
@@ -61,19 +88,12 @@
         </ul>
       </div>
       </div>
-      <div class='span7 main'>
-        <h3 id='feedtitle'>Main Content Section</h3>
+      <div class='span9 span-fixed-sidebar'>
+        <h3 id='feedtitle'></h3>
         <div id='itemlist'> </div>
-      </div>
-      <div class='span3 sidebar'>
-        <h3>Sidebar</h3>
-        <ul class="nav nav-tabs nav-stacked">
-          <li><a href='#'>Another Link 1</a></li>
-          <li><a href='#'>Another Link 2</a></li>
-          <li><a href='#'>Another Link 3</a></li>
-        </ul>
       </div>
     </div>
   </div>
+</body>
 {% endblock %}
 
