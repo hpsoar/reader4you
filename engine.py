@@ -116,14 +116,13 @@ def add_feed(user_id, url):
 
 def get_feedlist(user_id):
   feedlist = da.get_feedlist(user_id)
-  articles = []
+  #articles = []
   state = 'ok'
-  if feedlist: 
-    state = update_feed(feedlist[0])
-    print feedlist
-    articles = da.get_articles(feedlist[0]['id'])
+  #if feedlist: 
+  #  state = update_feed(feedlist[0])
+  #  articles = da.get_articles(feedlist[0]['id'])
 
-  return jsonify({ 'state': state, 'feedlist': feedlist, 'articles': articles})
+  return jsonify({ 'state': state, 'feedlist': feedlist })
 
 def update_feed(feed):
   state = 'ok'

@@ -6,7 +6,7 @@ $(function() {
         }, function(data) {
           if (data.state == 'ok') {
             util.addToFeedList(data.feed);
-            util.showItems(data.feed, data.articles)
+            util.showArticles(data.feed, data.articles)
           }
           else if (data.state == 'duplication') {
             alert('already added!');
@@ -17,7 +17,7 @@ $(function() {
           $('#feed_url').val('');
         });
       },
-      clearItems: function() {
+      clearArticles: function() {
         $('#itemlist').html('');
       },
       itemView: function(item) {
@@ -32,7 +32,7 @@ $(function() {
                   '<div class=author>${author}</div>' +
                   '<div>${description}</div>' + 
                 '</div>',
-      addItem: function(item) {
+      addArticle: function(item) {
         // TODO: use a template
         $(util.itemHtml.replace('${title}', item.title)
                        .replace('${link}', item.link)
@@ -41,11 +41,18 @@ $(function() {
                        .replace('${description}', item.description))
         .appendTo($('#itemlist'));
       },
-      showItems: function(feed, items) {
-        util.clearItems();
+      showArticles: function(feed, items) {
+        util.clearArticles();
         $('#feedtitle').attr('href', feed.link).html(feed.title);
         $.each(items, function(index, item) {
-          util.addItem(item);
+          util.addArticle(item);
+        });
+      },
+      getArticles: function(feed) {
+        $.getJSON($SCRIPT_ROOT + '/get_articles', {
+          feed_id: feed.id
+        }, function(data) {
+          util.showArticles(feed, data.articles);
         });
       },
       addToFeedList: function(feed) {
@@ -54,11 +61,7 @@ $(function() {
           href: feed.link,
           class: 'feedItem',
           click: function(){ 
-            $.getJSON($SCRIPT_ROOT + '/get_articles', {
-              feed_id: feed.id
-            }, function(data) {
-              util.showItems(feed, data.articles);
-            });
+            util.getArticles(feed);
             return false;
           }
         }).appendTo($('<li>').appendTo($('#feedlist')));
@@ -70,7 +73,8 @@ $(function() {
             util.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {
-            util.showItems(data.feedlist[0], data.articles);
+            console.log(data.feedlist);
+            util.getArticles(data.feedlist[0]);
           }
         });
       },
