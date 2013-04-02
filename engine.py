@@ -13,6 +13,7 @@ import urllib2
 import feedparser
 import time
 import datetime
+from operator import itemgetter
 
 def default_rss(url):
   feed = { }
@@ -42,6 +43,7 @@ def parse_article(e):
   if 'summary' in e: item['description'] = e.summary
   else: item['description'] = e.description
 
+  #TODO: time zone!!!
   if 'published_parsed' in e: item['published_parsed'] = datetime.datetime.fromtimestamp(time.mktime(e.published_parsed))
 
   for key in item.keys():
@@ -61,16 +63,15 @@ def parse_article(e):
 
 def read(url):
   try:
-    return urllib2.urlopen(url, timeout=2).read()
+    return urllib2.urlopen(url, timeout=5).read()
   except:
     return None
 
 def parse_feed(url, content):
   d = feedparser.parse(content)
-  print d.feed
 
   feed = default_rss(url)
-  feed['title'] = d.feed.title
+  if 'title' in d.feed: feed['title'] = d.feed.title
   if 'link' in d.feed: feed['link'] = d.feed.link
   if 'language' in d.feed: feed['language'] = d.feed.language
 
@@ -129,6 +130,8 @@ def update_feed(feed):
   content = read(feed['url'])
   if not content:
     state = 'network error'
+    return state
+
   newfeed, articles = parse_feed(feed['url'], content)
   if newfeed:
     for key in newfeed.keys():
@@ -147,5 +150,5 @@ def get_articles(feed_id):
     update article database, return all the articles for feed
   """
   state = update_feed(da.get_feed(feed_id))
-  return jsonify({ 'state': state, 'articles': da.get_articles(feed_id) })
+  return jsonify({ 'state': state, 'articles': sorted(da.get_articles(feed_id), key = itemgetter('published'), reverse=True) })
 

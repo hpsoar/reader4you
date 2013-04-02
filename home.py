@@ -48,7 +48,6 @@ def get_feedlist():
 @app.route('/get_articles')
 def get_articles():
   feed_id = request.args.get('feed_id')
-  print feed_id
   return engine.get_articles(feed_id)
 
 @app.route('/')
