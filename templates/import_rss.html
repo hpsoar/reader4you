@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block head %}
+{% endblock %}
+{% block body %}
+  <script type=text/javascript>
+  $.getJSON($SCRIPT_ROOT + '/import/import_google_reader_rss', {
+  }, function(data) {
+    if (data.state == 'ok') {
+      alert('ok');
+    }
+    else {
+      alert('error');
+    }
+  });
+    
+  </script> 
+  {% if session.import_rss %}
+  <div>import ...</div>
+  <div>{{ error }}</div>
+  {% else %}
+  <div> error: {{ error }}</div>
+  {% endif %}
+{% endblock %}

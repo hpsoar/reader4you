@@ -1,0 +1,10 @@
+{% macro feedItemView() -%}
+<script id="feedItemViewTmpl" type="text/x-jquery-tmpl">
+  <div id='feedItemView'>
+    <div><h4><a id='item_link', href='${link}'>${title}</a></h4></div>
+    <div id='author'>world</div>
+    <div id='description'>${description}</div>
+  </div>
+</script>
+{% endmacro -%}
+

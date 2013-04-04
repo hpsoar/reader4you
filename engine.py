@@ -61,12 +61,6 @@ def parse_article(e):
   #item['description_features'] = extract_features(item['description'])
   return item
 
-def read(url):
-  try:
-    return urllib2.urlopen(url, timeout=5).read()
-  except:
-    return None
-
 def parse_feed(url, content):
   d = feedparser.parse(content)
 
@@ -95,8 +89,9 @@ def add_feed(user_id, url):
     state = 'duplication'
     return jsonify({'state': state})
 
-  content = read(url)
-  if not content:
+  try:
+    feed = feedparser.parse(url)
+  except:
     state = 'network error'
     return jsonify({'state': state })
 
@@ -115,13 +110,9 @@ def add_feed(user_id, url):
     
   return jsonify({ 'state': state, 'feed': feed, 'articles': articles })
 
-def get_feedlist(user_id):
-  feedlist = da.get_feedlist(user_id)
-  #articles = []
+def get_feedlist_for_user(user_id):
+  feedlist = da.get_feedlist_for_user(user_id)
   state = 'ok'
-  #if feedlist: 
-  #  state = update_feed(feedlist[0])
-  #  articles = da.get_articles(feedlist[0]['id'])
 
   return jsonify({ 'state': state, 'feedlist': feedlist })
 
