@@ -1,4 +1,5 @@
 import datetime
+from models.da import DBObject
 
 try:
     import json
@@ -19,6 +20,8 @@ class APIEncoder(json.JSONEncoder):
             return obj.isoformat()
         elif isinstance(obj, ObjectId):
             return str(obj)
+        elif isinstance(obj, DBObject):
+            return obj.__dict__
         return json.JSONEncoder.default(self, obj)
 
 

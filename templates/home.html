@@ -53,18 +53,35 @@
     .article_summary_view .title .link {
       font-size: 18px;
     }
-.sidebar-nav-fixed {
-    padding: 9px 0;
-    position:fixed;
-    left:20px;
-    top:60px;
-    width:250px;
-}
+    .sidebar-nav-fixed {
+      padding: 0px 0;
+      position:fixed;
+      left:20px;
+      top:50px;
+      width:250px;
+    }
+    .sidebar-nav-scrollable {
+      padding: 0px 0;
+      position:fixed;
+      overflow-y:scroll;
+      left:20px;
+      top:120px;
+      bottom:-15px;
+      width:250px;
+    }
 
-.row-fluid > .span-fixed-sidebar {
-    margin-left: 290px;
-    margin-top: 10px;
-}
+    .content-fixed {
+      position:fixed;
+      top:40px;
+      bottom:0px;
+      left:290px;
+      right:20px;
+      overflow-y:scroll;
+    }
+    .nav > .active {
+      color: #ffffff;
+      background-color: #0088cc;
+    }
     
   </style>
   <script type=text/javascript src="{{ url_for('static', filename='js/home.js') }}"></script>
@@ -93,18 +110,25 @@
     <div class='row-fluid row'>
       <div class='span3 sidebar'>
         <div class='well sidebar-nav-fixed'>
-          <ul id='feedlist' class="nav nav-list">
-          <li class="nav-header">My Feeds</li>
-          <li><div>
-            <input type=text id=feed_url placeholder="feed url" class="inputFeedUrlNormal">
-          </div>
-          </li>
-        </ul>
+          <ul class='nav nav-list'>
+            <li class="nav-header" style='font-size:16px'>Subscriptions</li>
+            <li>
+              <div> <input type=text id=feed_url placeholder="feed url" class="inputFeedUrlNormal"> </div>
+            </li>
+          </ul>
+        </div>
+        <div class='well sidebar-nav-scrollable'>
+          <ul id='feedlist' class="nav nav-list bs-docs-sidenav">
+          </ul>
+        </div>
+        <div>
+        </div>
       </div>
-      </div>
-      <div class='span9 span-fixed-sidebar'>
+      <div class='span9'>
+        <div class='content-fixed'>
         <h3><a id='feedtitle' style='color:black'></a></h3>
         <div id='itemlist'> </div>
+        <div>
       </div>
     </div>
   </div>

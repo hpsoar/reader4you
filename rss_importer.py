@@ -6,6 +6,7 @@ from collections import defaultdict
 from utils import urlnorm
 from oauth2client.client import OAuth2WebServerFlow, FlowExchangeError
 import settings
+from models.feed import Feed, Subscription
 
 class Importer:
   def clear_feeds(self):
@@ -29,13 +30,14 @@ class GoogleOAuth:
     return self._oauth_webserver_flow.step1_get_authorize_url()
 
   def step2_get_credential(self, code):
-    return self._oauth_webserver_flow.step2_exchange(code)
+    try:
+      return self._oauth_webserver_flow.step2_exchange(code)
+    except FlowExchangeError:
+      return None
 
 class GoogleReaderImporter(Importer):
   def __init__(self, credential):
     self._credential = credential
-
-    self._subscription_folders = []
 
   def import_feeds(self):
     sub_url = '%s/0/subscription/list' % settings.GOOGLE_READER_API
@@ -46,21 +48,7 @@ class GoogleReaderImporter(Importer):
     feeds_xml = content and content[1]
     feeds = self._parse(feeds_xml)
 
-    folders = defaultdict(list)
-    for item in feeds:
-        folders = self._process_item(item, folders)
-    
-    self._fill_subscription_foler(folders)
-
-    return self._subscription_folders
-  
-  def _rearrange_folders(self, folders, depth=0):
-    for folder, items in folders.items():
-      if folder == 'Root':
-        self._subscription_folders += items
-      else:
-        # folder_parents = folder.split(u' \u2014 ')
-        self._subscription_folders.append({folder: items})
+    return [self._process_item(item) for item in feeds]
 
   def _parse(self, feeds_xml):
     parser = etree.XMLParser(recover=True)
@@ -68,7 +56,7 @@ class GoogleReaderImporter(Importer):
     feeds = tree.xpath('/object/list/object')
     return feeds
   
-  def _process_item(item, folders):
+  def _process_item(self, item):
     feed_title = item.xpath('./string[@name="title"]') and \
                           item.xpath('./string[@name="title"]')[0].text
     feed_address = item.xpath('./string[@name="id"]') and \
@@ -91,8 +79,7 @@ class GoogleReaderImporter(Importer):
           'link': feed_link,
           'category': category,
           }
-      if not category: category = "Root"
-      folders[category].append(feed)
+      return feed
   
     except Exception, e:
       print '---->Exception: %s: %s' % (e, item)

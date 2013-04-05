@@ -6,7 +6,8 @@
   $.getJSON($SCRIPT_ROOT + '/import/import_google_reader_rss', {
   }, function(data) {
     if (data.state == 'ok') {
-      alert('ok');
+      console.log(data.feedlist)
+      window.location = $SCRIPT_ROOT+'/';     
     }
     else {
       alert('error');

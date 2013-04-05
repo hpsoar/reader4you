@@ -8,6 +8,8 @@ from flask import Flask, request, session, g, redirect, url_for, abort, \
 from flask.helpers import make_response
 import engine
 import rss_importer
+from models.user import User
+import settings
 
 USERNAME = 'admin'
 PASSWORD = 'default'
@@ -20,13 +22,19 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
   error = None
+
   if request.method == 'POST':
-    if request.form['username'] != app.config['USERNAME']:
+    user = User.get_by_name(request.form['username'])
+    if not user and settings.DEBUG == 'debug':
+      user = User(request.form['username'], request.form['password'])
+      user.save()
+
+    if not user:
       error = 'Invalid username'
-    elif request.form['password'] != app.config['PASSWORD']:
+    elif user.password != request.form['password']:
       error = 'Invalid password'
     else:
-      session['user_id'] = 'admin'
+      session['user_id'] = user.user_id
       flash('You were logged in')
       return redirect(url_for('home'))
   return render_template('login.html', error=error)
@@ -40,17 +48,17 @@ def logout():
 @app.route('/add_feed')
 def add_feed():
   url = request.args.get('feed_url')
-  return engine.add_feed(session['user_id'], url)
+  return engine.subscribe(session['user_id'], url)
 
 @app.route('/get_feedlist')
 def get_feedlist():
   user_id = session['user_id'] 
   return engine.get_feedlist_for_user(user_id)
 
-@app.route('/get_articles')
-def get_articles():
+@app.route('/get_stories')
+def get_stories():
   feed_id = request.args.get('feed_id')
-  return engine.get_articles(feed_id)
+  return engine.get_stories_for_feed(feed_id)
 
 @app.route('/reader/google_reader_authorize')
 def google_reader_authorize():
@@ -62,19 +70,19 @@ def google_reader_authorize():
 def google_reader_callback():
   redirect_uri = request.url_root[:-1] + url_for('google_reader_callback')
   
-  try:
-      session['credential'] = rss_importer.GoogleOAuth(redirect_uri).step2_get_credential(request.args.get('code'))
-      session['import_rss'] = True
-  except FlowExchangeError:
-    return render_template('import_rss.html', error='hello')
+  credential = rss_importer.GoogleOAuth(redirect_uri).step2_get_credential(request.args.get('code'))
+  if credential:
+    session['credential'] = credential 
+    session['import_rss'] = True
+  else:
+    render_template('import_rss.html', error='hello')
 
   return render_template('import_rss.html')
 
 @app.route('/import/import_google_reader_rss')
 def import_google_reader_rss():
   importer = rss_importer.GoogleReaderImporter(session['credential'])
-  importer.import_feeds()
-  return jsonify({'state': 'ok' })
+  return engine.subscribe_imported_feeds(session['user_id'], importer.import_feeds())
 
 @app.route('/')
 def home():

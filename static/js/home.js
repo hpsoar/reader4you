@@ -6,7 +6,7 @@ $(function() {
         }, function(data) {
           if (data.state == 'ok') {
             util.addToFeedList(data.feed);
-            util.showArticles(data.feed, data.articles)
+            util.showArticles(data.feed, data.stories)
           }
           else if (data.state == 'duplication') {
             alert('already added!');
@@ -27,44 +27,54 @@ $(function() {
       itemHtml: '<div class=article_summary_view>' +
                   '<div class=title>' + 
                       '<a class=link href=${link} >${title}</a>' +
-                      '<span class=pubdate>${published}</span>' +
+                      '<span class=pubdate>${publish_date}</span>' +
                   '</div>' +
                   '<div class=author>${author}</div>' +
-                  '<div>${description}</div>' + 
+                  '<div>${summary}</div>' + 
                 '</div>',
       addArticle: function(item) {
         // TODO: use a template
         $(util.itemHtml.replace('${title}', item.title)
                        .replace('${link}', item.link)
-                       .replace('${published}', item.published_parsed)
+                       .replace('${publish_date}', item.publish_date)
                        .replace('${author}', item.author)
-                       .replace('${description}', item.description))
+                       .replace('${summary}', item.summary))
         .appendTo($('#itemlist'));
       },
       showArticles: function(feed, items) {
         util.clearArticles();
-        $('#feedtitle').attr('href', feed.link).html(feed.title);
+        $('#feedtitle').attr('href', feed.link);
+        $('#feedtitle').html(feed.feed_title);
         $.each(items, function(index, item) {
           util.addArticle(item);
         });
       },
       getArticles: function(feed) {
-        $.getJSON($SCRIPT_ROOT + '/get_articles', {
-          feed_id: feed.id
+        $.getJSON($SCRIPT_ROOT + '/get_stories', {
+          feed_id: feed.feed_id
         }, function(data) {
-          util.showArticles(feed, data.articles);
+          util.showArticles(feed, data.stories);
         });
       },
+      selectedFeed:null,
       addToFeedList: function(feed) {
         $('<a>',{
-          text: feed.title,
-          href: feed.link,
+          text: feed.feed_title,
+          href: feed.feed_link,
           class: 'feedItem',
-          click: function(){ 
-            util.getArticles(feed);
-            return false;
-          }
-        }).appendTo($('<li>').appendTo($('#feedlist')));
+        }).appendTo($('<li>').click(function() {
+           util.selectFeed(feed, $(this)); 
+           return false;
+        }).appendTo($('#feedlist')));
+      },
+      selectFeed: function(feed, obj) {
+        util.getArticles(feed);
+        if (util.selectedFeed) {
+          util.selectedFeed.removeClass('active');
+        }
+        console.log(obj);
+        obj.addClass('active');
+        util.selectedFeed = obj;
       },
       getFeedList: function() {
         $.getJSON($SCRIPT_ROOT + '/get_feedlist', {
@@ -73,8 +83,7 @@ $(function() {
             util.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {
-            console.log(data.feedlist);
-            util.getArticles(data.feedlist[0]);
+            util.selectFeed(data.feedlist[0], $('#feedlist li:first-child'));
           }
         });
       },
