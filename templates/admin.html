@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block head %}
+  <style type='text/css'>
+    body {
+    }
+    #feedlist td {
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    table .date {
+      width: 180px;
+    }
+    .table-non-fluid {
+      table-layout:fixed;
+      width: 100%;
+    }
+    .toolbar {
+      position:fixed;
+      top:50px;
+      left:20px;
+      right:20px;
+    }
+    .content-fixed {
+      position:fixed;
+      top:90px;
+      bottom:0px;
+      left:20px;
+      right:20px;
+      overflow-y:scroll;
+    }
+    .nav > .active {
+      color: #ffffff;
+      background-color: #0088cc;
+    }
+    
+  </style>
+  <script type=text/javascript src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+  <div class="container">
+    <div class='navbar navbar-inverse navbar-fixed-top'>
+      <div class='navbar-inner nav-collapse' style='height: auto;'>
+        <ul class='nav'>
+          <li class='active'><a href='#'>Home</a></li>
+          <li><a href='#'>Feeds</a></li>
+          <li><a href='#'>Stories</a></li>
+        </ul>
+        <ul class='nav pull-right'>
+          {% if session.user_id %} 
+          <li> <a href="#">import from OMPL</a></li>
+          <li> <a href="{{ url_for('logout') }}">log out</a> </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid" >
+    <div class='row-fluid row'>
+      <div class='span12'>
+        <div class='toolbar'>
+          <button type="button" class="btn btn-success"></button>
+          <button id='update_feed_action' type="button" class="btn btn-primary">Update Feed</button>
+          <button id='fetch_feed_history_action' type="button" class="btn btn-primary">Fetch Feed History</button>
+          <button id='feed_update_daemon_action' type="button" class="btn btn-primary">Start Feed Update Deamon</button>
+        </div>
+        <div class='content-fixed'>
+           <table class="table table-bordered table-non-fluid">
+              <thead>
+                <tr>
+                  <th style='width:50px;'>#</th>
+                  <th>Title</th>
+                  <th style='width:80px;'>Subscribers</th>
+                  <th class='date'>Scheduled Update</th>
+                  <th class='date'>Last Update</th>
+                  <th class='date'>Oldest Story</th>
+                </tr>
+              </thead>
+              <tbody id='feedlist'>
+              </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}
+

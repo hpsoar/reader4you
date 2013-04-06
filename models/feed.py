@@ -62,6 +62,9 @@ class Feed(DBObject):
     self.num_subscribers = 0
     self.etag = None
     self.last_modified = None
+    self.last_update = datetime.datetime.min
+    self.oldest_story = datetime.datetime.utcnow()
+    self.next_scheduled_update = datetime.datetime.min
 
   def save(self):
     db.feeds.save(self.__dict__)

@@ -7,7 +7,6 @@
   :copyright: (c) 2013 by Aldrich Huang.
   :license: BSD, see LICENSE for more detials.
 """
-from tools import jsonify
 import urllib2
 import utils.feedfinder as feedfinder
 import utils.urlnorm as urlnorm
@@ -27,7 +26,7 @@ def subscribe(user_id, url):
   state = 'ok'
   url = urlnorm.normalize(url)
   if not feedfinder.isFeed(url):
-    return jsonify({'state': 'invalid feed url'})
+    return {'state': 'invalid feed url'}
 
   feed, feed_exist = Feed.get_or_create(url)
   
@@ -38,9 +37,9 @@ def subscribe(user_id, url):
 
   if sub_exist:
     state = 'duplication'
-    return jsonify({'state': state})
+    return {'state': state}
 
-  return jsonify({ 'state': state, 'feed': feed, 'stories': Story.get_stories_for_feed(feed.feed_id) })
+  return { 'state': state, 'feed': feed, 'stories': Story.get_stories_for_feed(feed.feed_id) }
 
 def subscribe_imported_feeds(user_id, items):
   """
@@ -58,7 +57,7 @@ def subscribe_imported_feeds(user_id, items):
     feed, feed_exist = Feed.get_or_create(item['url'], item['title'], item['link'])
     sub, sub_exist = Subscription.get_or_create(user_id, feed.feed_id)
     if not sub_exist: feedlist.append(feed)
-  return jsonify({ 'state': state, 'feedlist': feedlist })
+  return { 'state': state, 'feedlist': feedlist }
 
 def get_feedlist_for_user(user_id):
   subs = Subscription.get_by_user(user_id)
@@ -66,7 +65,7 @@ def get_feedlist_for_user(user_id):
   feedlist = [Feed.get_by_id(sub.feed_id) for sub in subs]
   state = 'ok'
 
-  return jsonify({ 'state': state, 'feedlist': feedlist })
+  return { 'state': state, 'feedlist': feedlist }
 
 def get_stories_for_feed(feed_id):
   """
@@ -74,5 +73,5 @@ def get_stories_for_feed(feed_id):
   """
   state = 'ok'
   stories = Story.get_stories_for_feed(feed_id)
-  return jsonify({ 'state': state, 'stories': sorted(stories, key = lambda x: x.publish_date, reverse=True) })
+  return { 'state': state, 'stories': sorted(stories, key = lambda x: x.publish_date, reverse=True) }
 

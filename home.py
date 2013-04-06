@@ -10,6 +10,7 @@ import engine
 import rss_importer
 from models.user import User
 import settings
+from tools import jsonify
 
 USERNAME = 'admin'
 PASSWORD = 'default'
@@ -48,17 +49,17 @@ def logout():
 @app.route('/add_feed')
 def add_feed():
   url = request.args.get('feed_url')
-  return engine.subscribe(session['user_id'], url)
+  return jsonify(engine.subscribe(session['user_id'], url))
 
 @app.route('/get_feedlist')
 def get_feedlist():
   user_id = session['user_id'] 
-  return engine.get_feedlist_for_user(user_id)
+  return jsonify(engine.get_feedlist_for_user(user_id))
 
 @app.route('/get_stories')
 def get_stories():
   feed_id = request.args.get('feed_id')
-  return engine.get_stories_for_feed(feed_id)
+  return jsonify(engine.get_stories_for_feed(feed_id))
 
 @app.route('/reader/google_reader_authorize')
 def google_reader_authorize():
@@ -82,13 +83,19 @@ def google_reader_callback():
 @app.route('/import/import_google_reader_rss')
 def import_google_reader_rss():
   importer = rss_importer.GoogleReaderImporter(session['credential'])
-  return engine.subscribe_imported_feeds(session['user_id'], importer.import_feeds())
+  return jsonify(engine.subscribe_imported_feeds(session['user_id'], importer.import_feeds()))
 
 @app.route('/')
 def home():
   if not session.get('user_id', None):
     return render_template('login.html')
   return render_template('home.html');
+
+@app.route('/admin')
+def admin():
+  if not session.get('user_id'):
+    return redirect(url_for('home'))
+  return render_template('admin.html')
 
 if __name__ == '__main__':
   SERVER_NAME = '127.0.0.1'
