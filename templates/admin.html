@@ -12,6 +12,10 @@
     table .date {
       width: 180px;
     }
+    table .item-check {
+      width: 30px;
+      text-align:center;
+    }
     .table-non-fluid {
       table-layout:fixed;
       width: 100%;
@@ -71,7 +75,7 @@
            <table class="table table-bordered table-non-fluid">
               <thead>
                 <tr>
-                  <th style='width:50px;'>#</th>
+                  <th class='item-check'><input type='checkbox' id='all_feeds_check'></th>
                   <th>Title</th>
                   <th style='width:80px;'>Subscribers</th>
                   <th class='date'>Scheduled Update</th>

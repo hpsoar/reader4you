@@ -85,6 +85,12 @@ def import_google_reader_rss():
   importer = rss_importer.GoogleReaderImporter(session['credential'])
   return jsonify(engine.subscribe_imported_feeds(session['user_id'], importer.import_feeds()))
 
+@app.route('/import/fetch_history_stories', methods=['POST'])
+def fetch_history_stories():
+  feed_ids = request.json['feed_ids']
+  engine.fetch_history_stories(feed_ids)
+  return jsonify({'hello': 'world' })
+
 @app.route('/')
 def home():
   if not session.get('user_id', None):

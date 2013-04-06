@@ -75,3 +75,6 @@ def get_stories_for_feed(feed_id):
   stories = Story.get_stories_for_feed(feed_id)
   return { 'state': state, 'stories': sorted(stories, key = lambda x: x.publish_date, reverse=True) }
 
+def fetch_history_stories(feed_ids):
+  for feed_id in feed_ids:
+
