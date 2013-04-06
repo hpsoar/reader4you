@@ -7,6 +7,9 @@ $(function() {
           if (data.state == 'ok') {
             util.addToFeedList(data.feed);
             util.showArticles(data.feed, data.stories)
+            util.showFeedSelection($('#feedlist li:last-child'));
+            var divObj = $('#feedlist_container')[0];
+            divObj.scrollTop = divObj.scrollHeight;
           }
           else if (data.state == 'duplication') {
             alert('already added!');
@@ -56,24 +59,24 @@ $(function() {
           util.showArticles(feed, data.stories);
         });
       },
-      selectedFeed:null,
+      selectedFeedItem:null,
+      showFeedSelection:function(obj) {
+        if (util.selectedFeedItem) {
+          util.selectedFeedItem.removeClass('active');
+        }
+        obj.addClass('active');
+        util.selectedFeedItem = obj;
+      },
       addToFeedList: function(feed) {
         $('<a>',{
           text: feed.feed_title,
           href: feed.feed_link,
           class: 'feedItem',
         }).appendTo($('<li>').click(function() {
-           util.selectFeed(feed, $(this)); 
-           return false;
+          util.getArticles(feed);
+          util.showFeedSelection($(this));
+          return false;
         }).appendTo($('#feedlist')));
-      },
-      selectFeed: function(feed, obj) {
-        util.getArticles(feed);
-        if (util.selectedFeed) {
-          util.selectedFeed.removeClass('active');
-        }
-        obj.addClass('active');
-        util.selectedFeed = obj;
       },
       getFeedList: function() {
         $.getJSON($SCRIPT_ROOT + '/get_feedlist', {
@@ -83,7 +86,8 @@ $(function() {
             util.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {
-            util.selectFeed(data.feedlist[0], $('#feedlist li:first-child'));
+            util.getArticles(data.feedlist[0]); 
+            util.showFeedSelection($('#feedlist li:first-child'));
           }
         });
       },
