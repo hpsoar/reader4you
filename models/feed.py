@@ -65,6 +65,7 @@ class Feed(DBObject):
     self.last_update = datetime.datetime.min
     self.oldest_story = datetime.datetime.utcnow()
     self.next_scheduled_update = datetime.datetime.min
+    self.num_stories = 0
 
   def save(self):
     db.feeds.save(self.__dict__)
@@ -110,7 +111,8 @@ class Feed(DBObject):
   @classmethod
   def get_by_id(cls, feed_id):
     feeds = cls.filter({'feed_id': int(feed_id)})
-    if feeds and len(feeds) > 0: return feeds[0]
+    if feeds and len(feeds) > 0: 
+      return feeds[0]
     return None
   
 class Subscription(DBObject):

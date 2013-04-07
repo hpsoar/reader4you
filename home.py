@@ -12,13 +12,8 @@ from models.user import User
 import settings
 from tools import jsonify
 
-USERNAME = 'admin'
-PASSWORD = 'default'
-SECRET_KEY = 'development key' #
-
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+app.config.from_pyfile('config.cfg')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -87,9 +82,7 @@ def import_google_reader_rss():
 
 @app.route('/import/fetch_history_stories', methods=['POST'])
 def fetch_history_stories():
-  feed_ids = request.json['feed_ids']
-  engine.fetch_history_stories(feed_ids)
-  return jsonify({'hello': 'world' })
+  return jsonify(engine.fetch_history_stories(request.json['feed_ids']))
 
 @app.route('/')
 def home():

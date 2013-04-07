@@ -40,6 +40,7 @@
     }
     
   </style>
+  <script type=text/javascript src="{{ config.JUGGERNAUT_DRIVER }}"></script>
   <script type=text/javascript src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
 
@@ -77,6 +78,8 @@
                 <tr>
                   <th class='item-check'><input type='checkbox' id='all_feeds_check'></th>
                   <th>Title</th>
+                  <th>Status</th>
+                  <th style='width:50px;'>Stories</th>
                   <th style='width:80px;'>Subscribers</th>
                   <th class='date'>Scheduled Update</th>
                   <th class='date'>Last Update</th>

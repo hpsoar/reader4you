@@ -56,8 +56,6 @@ class ProcessFeed:
     except:
       self.feed.last_modified = None
     
-    self.fpf.entries = self.fpf.entries[:50] #TODO
-    
     if self.fpf.feed.get('title'):
       self.feed.feed_title = self.fpf.feed.get('title')
 
@@ -88,6 +86,9 @@ class ProcessFeed:
 
       if e.get('published_parsed'): story.publish_date = datetime.datetime.fromtimestamp(time.mktime(e.published_parsed))
       story.save()
+
+    self.feed.num_stories = len(Story.get_stories_for_feed(self.feed.feed_id))
+    self.feed.save()
 
     return FEED_OK, self.feed
 

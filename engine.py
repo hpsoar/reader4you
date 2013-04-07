@@ -76,5 +76,10 @@ def get_stories_for_feed(feed_id):
   return { 'state': state, 'stories': sorted(stories, key = lambda x: x.publish_date, reverse=True) }
 
 def fetch_history_stories(feed_ids):
-  for feed_id in feed_ids:
-
+  from  models.fetch_feed_history import HistoryStoryFetcher
+  fetcher = HistoryStoryFetcher()
+  states = fetcher.add_feeds(feed_ids)
+  # start a thread to do the fetch
+  fetcher.start()
+  #fetcher.join()
+  return { 'state':'ok', 'feed_states': states}
