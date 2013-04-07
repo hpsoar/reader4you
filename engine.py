@@ -68,12 +68,9 @@ def get_feedlist_for_user(user_id):
   return { 'state': state, 'feedlist': feedlist }
 
 def get_stories_for_feed(feed_id):
-  """
-    update article database, return all the articles for feed
-  """
   state = 'ok'
-  stories = Story.get_stories_for_feed(feed_id)
-  return { 'state': state, 'stories': sorted(stories, key = lambda x: x.publish_date, reverse=True) }
+  stories = Story.get_stories_for_feed(feed_id, 0, 6)
+  return { 'state': state, 'stories': sorted(stories, key=lambda x: x.publish_date, reverse=True) }
 
 def fetch_history_stories(feed_ids):
   from  models.fetch_feed_history import HistoryStoryFetcher

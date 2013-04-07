@@ -1,9 +1,42 @@
 $(function() {
   var global = this;
   var jug = new Juggernaut();
-  var model = {
+  var model = global.model = {
+    feeds: [],
+    reserve: 10,
+    waitingRange: [0, 0],
+    fetchFeeds: function() {
+      // fetch with waitingRange taking into account
+      $.getJSON($SCRIPT_ROOT + '/get_feedlist', {
+      }, function(data) {
+        if (data.state == 'ok') {
+          model.feeds = model.feeds.concat(data.feedlist);
+        }
+        var offset = model.waitingRange[0];
+        var end = model.waitingRange[1];
+
+        if (end - offset > 0) {
+          var noMore = false;
+          if (end > model.feeds.length) {
+            end = model.feeds.length;
+            noMore = true;
+          }
+          global.view.displayFeeds(model.feeds.slice(offset, end), offset, noMore);
+        }
+      });
+    },
+    getFeeds: function(offset, end) {
+      if (end > model.feeds.length) {
+        model.waitingRange = [model.feeds.length, end];
+      }
+      if (end > model.feeds.length + model.reserve) {
+        model.fetchFeeds();
+      }
+      if (end > model.feeds.length) end = model.feeds.length;
+      return model.feeds.slice(offset, end);
+    },
   };
-  var util = global.admin = {
+  var view = global.view = {
     jug: jug,
     clearArticles: function() {
       $('#itemlist').html('');
@@ -12,26 +45,10 @@ $(function() {
       // TODO: find all in ${}, replace with corresponding field in item
       // create document node
     },
-    applyTmpl: function(tmpl, data) {
-      var pattern = /\$\{([a-z,A-Z,_]*)\}/gi;
-      var keys = new Array();
-      var rkeys = new Array();
-      while (match = pattern.exec(tmpl)) {
-        rkeys.push(match[0]);
-        keys.push(match[1]);
-      }
-      for (var i in keys) {
-        if (data.hasOwnProperty(keys[i])) {
-          tmpl = tmpl.replace(rkeys[i], data[keys[i]]);
-        }
-        else {
-          console.log('error:' + keys[i]);
-        }
-      }
-      return $(tmpl);
-    },
     feedList: $('#feedlist'),
-    feedRowHtml: '<tr>' + 
+    pageSize: 1000,
+    pageIdx: 0,
+    feedRowHtml: '<tr id=${feed_id}>' + 
       '<td class=item-check><input type=checkbox name=feed_check value=${feed_id}></td>' +
       '<td>${feed_title}</td>' +
       '<td>${num_stories}</td>' +
@@ -44,35 +61,32 @@ $(function() {
     addToFeedList: function(feed, idx) {
       //feed['row_idx'] = idx;
       css = idx % 2 == 0 ? 'warning': 'info';
-      util.applyTmpl(util.feedRowHtml, feed).addClass(css)
+      util.applyTmpl(view.feedRowHtml, feed).addClass(css)
         .children('td').eq(1)
-        .after(util.applyTmpl(util.feedStateColumn, {'state':'OK'}))
+        .after(util.applyTmpl(view.feedStateColumn, {'state':'OK'}))
         .end()
         .end()
-        .appendTo(util.feedList);
+        .appendTo(view.feedList);
+    },
+    noMoreFeeds: function() {
     },
     getStateColumn: function(feed_id) {
     },
-    selectFeed: function(feed, obj) {
-      util.getArticles(feed);
-      if (util.selectedFeed) {
-        util.selectedFeed.removeClass('active');
-      }
-      obj.addClass('active');
-      util.selectedFeed = obj;
-    },
-    getFeedList: function() {
-      $.getJSON($SCRIPT_ROOT + '/get_feedlist', {
-      }, function(data) {
-        $.each(data.feedlist, function(index, feed){
-          util.addToFeedList(feed, index);
-        });
+    displayFeeds: function(feeds, offset, noMore) {
+      $.each(feeds, function(idx, feed) {
+        view.addToFeedList(feed, offset + idx);
       });
+      if (noMore) {
+        console.log('no more...');
+      }
     },
-    keyPressed: function(e) {
-      var code = (e.keyCode ? e.keyCode : e.which);
-      if (code == 13) {
-        util.addFeed();
+    loadFeeds: function() {
+      var offset = view.pageIdx * view.pageSize;
+      var end = offset + view.pageSize;
+      var feeds = global.model.getFeeds(offset, end);
+      view.displayFeeds(feeds, offset, false);
+      if (feeds.length < view.pageSize) {
+        // waiting
       }
     },
     fetchHistoryStories: function(feed_ids) {
@@ -86,7 +100,7 @@ $(function() {
           if (data.state == 'ok') {
             $.each(data.feed_states, function(idx, state) {
               if (state) {
-                //feed_ids[idx]
+                view.feedList.children('#'+feed_ids[idx]).children('#state').html('Updating...');
               }
             });
           }
@@ -112,7 +126,7 @@ $(function() {
         $.each($('[name=feed_check]'), function(idx, cb) {
           if (cb.checked) ids.push(cb.value);
         });
-        util.fetchHistoryStories(ids);
+        view.fetchHistoryStories(ids);
       });
 
       $('#update_feed_action').click(function() {
@@ -132,7 +146,14 @@ $(function() {
         else if (src == 'OPML') {
         }
         else if (src == 'google-reader-history') {
-          console.log(data);
+          var feedState = view.feedList.children('#'+data.feed_id).children('#state');
+          if (data.state == 'ok') {
+            // should update the state of feed in model, then the view
+            feedState.html('Updated');
+          }
+          else {
+            feedState.html('Error!');
+          }
         }
         else {
           //error
@@ -140,11 +161,11 @@ $(function() {
       });
     },
     init: function() {
-      util.setupActions();
-      util.getFeedList();
-      util.subscribeImport('google-reader-history');
+      view.setupActions();
+      view.loadFeeds();
+      view.subscribeImport('google-reader-history');
     }
   };
-  util.init();
+  view.init();
 });
 

@@ -9,6 +9,7 @@ from flask.helpers import make_response
 import engine
 import rss_importer
 from models.user import User
+from models.feed import Feed, Story
 import settings
 from tools import jsonify
 
@@ -54,7 +55,20 @@ def get_feedlist():
 @app.route('/get_stories')
 def get_stories():
   feed_id = request.args.get('feed_id')
-  return jsonify(engine.get_stories_for_feed(feed_id))
+
+  offset = int(request.args.get('offset', 0))
+  page = int(request.args.get('page', -1));
+  limit = int(request.args.get('limit', 6))
+
+  if page >= 0: offset = page * limit
+
+  state = 'ok'
+  stories = Story.get_stories_for_feed(feed_id, offset, limit)
+
+  return jsonify({ 
+    'state': state, 
+    'stories': sorted(stories, key=lambda x: x.publish_date, reverse=True)
+    })
 
 @app.route('/reader/google_reader_authorize')
 def google_reader_authorize():
