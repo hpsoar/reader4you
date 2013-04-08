@@ -3,20 +3,6 @@
   <style type='text/css'>
     body {
     }
-    #content {
-      background-color: #FFF;
-      border-radius: 5px;
-    }
-    #content .main {
-    }
-    #content .sidebar {
-      padding: 10px;
-    }
-    #content p {
-      line-height: 30px;
-    }
-    #content .sidebar a {
-    }
     .inputFeedUrlNormal {
       width: 200;
     }
@@ -30,7 +16,7 @@
     }
     .article_summary_view {
       padding: 12px 19px 19px;
-      margin: 0 auto 20px;
+      margin: 0 20px 20px;
       background-color: #fff;
       border: 1px solid #e5e5e5;
       -webkit-border-radius: 5px;
@@ -55,18 +41,18 @@
     }
     .sidebar-nav-fixed {
       padding: 0px 0;
-      position:fixed;
-      left:20px;
       top:50px;
-      width:250px;
     }
     .sidebar-nav-scrollable {
       padding: 0px 0;
-      position:fixed;
       overflow-y:scroll;
-      left:20px;
       top:120px;
       bottom:0px;
+    }
+
+    .sidebar-nav {
+      position:fixed;
+      left:20px;
       width:250px;
     }
 
@@ -109,7 +95,7 @@
   <div class="container-fluid" >
     <div class='row-fluid row'>
       <div class='span3 sidebar'>
-        <div class='well sidebar-nav-fixed'>
+        <div class='well sidebar-nav sidebar-nav-fixed'>
           <ul class='nav nav-list'>
             <li class="nav-header" style='font-size:16px'>Subscriptions</li>
             <li>
@@ -117,7 +103,7 @@
             </li>
           </ul>
         </div>
-        <div id='feedlist_container' class='well sidebar-nav-scrollable'>
+        <div id='feedlist_container' class='well sidebar-nav sidebar-nav-scrollable'>
           <ul id='feedlist' class="nav nav-list bs-docs-sidenav">
           </ul>
         </div>

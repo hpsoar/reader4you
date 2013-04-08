@@ -6,8 +6,8 @@ $(function() {
         }, function(data) {
           if (data.state == 'ok') {
             view.addToFeedList(data.feed);
-            view.showArticles(data.feed, data.stories)
             view.showFeedSelection($('#feedlist li:last-child'));
+            view.showArticles(data.feed, data.stories)
 
             // scroll to added feed
             $('#feedlist_container')[0].scrollTop = divObj.scrollHeight;
@@ -41,14 +41,15 @@ $(function() {
         $.each(items, function(index, item) {
           util.applyTmpl(view.itemHtml, item).appendTo(view.storyList);
         });
-        console.log($('#itemlist').children('div').length);
       },
       pageIdx: 0,
       pageSize: 6,
       fetching: false,
+      loadingError: false,
       selectedFeed: null,
       selectedFeedItem:null,
       storyList: $('#itemlist'),
+      // TODO: extract some code to model
       getArticles: function(feed) {
         if (view.fetching) return;
         view.fetching = true;
@@ -58,16 +59,21 @@ $(function() {
           page:view.pageIdx,
           limit:view.pageSize,
         }, function(data) {
+          view.fetching = false;
+
           view.showArticles(feed, data.stories);
           if (data.stories.length > 0) { 
             ++view.pageIdx;
+            view.loadMoreStoriesIfNeeded();
           }
           else {
             console.log(view.pageIdx + '; ' + data.stories.length);
             console.log('no more');
           }
-        }).always(function() {
+        }).fail(function() {
+          console.log('failed');
           view.fetching = false;
+          view.loadingError = true;
         });
       },
       showFeedSelection:function(obj) {
@@ -83,8 +89,8 @@ $(function() {
           href: feed.feed_link,
           class: 'feedItem',
         }).appendTo($('<li>').click(function() {
-          view.getArticles(feed);
           view.showFeedSelection($(this));
+          view.getArticles(feed);
           return false;
         }).appendTo($('#feedlist')));
       },
@@ -96,10 +102,20 @@ $(function() {
             view.addToFeedList(feed);
           });
           if (data.feedlist.length > 0) {
-            view.getArticles(data.feedlist[0]); 
+            // TODO: return stories with feed, may pass the selectedFeed, stored in cookie to server
             view.showFeedSelection($('#feedlist li:first-child'));
+            view.getArticles(data.feedlist[0]); 
           }
         });
+      },
+      loadMoreStoriesIfNeeded: function() {
+        var storyItems = view.storyList.children('div');
+        if (storyItems.length < view.pageSize) return;
+        console.log(storyItems.length);
+        var checkPoint = storyItems.eq(Math.max(storyItems.length - 3, 0)).offset().top;
+        var pivotal = $('#content-area').height();
+        // TODO: fix bug for too short list
+        if (pivotal > checkPoint) view.getArticles(view.selectedFeed);
       },
       keyPressed: function(e) {
         var code = (e.keyCode ? e.keyCode : e.which);
@@ -111,12 +127,7 @@ $(function() {
 
   $('#feed_url').bind('keypress', view.keyPressed);
   $('#content-area').scroll(function(event) {
-    var storyItems = view.storyList.children('div');
-    if (storyItems.length < view.limit) return;
-    var checkPoint = storyItems.eq(Math.max(storyItems.length - 2, 0)).offset().top;
-    var pivotal = $('#content-area').scrollTop() + $('#content-area').height();
-    // TODO: fix bug for too short list
-    if (pivotal > checkPoint) view.getArticles(view.selectedFeed);
+    view.loadMoreStoriesIfNeeded();
   });
   view.getFeedList();
 });
