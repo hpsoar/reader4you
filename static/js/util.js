@@ -17,7 +17,7 @@
           console.log('error:' + keys[i]);
         }
       }
-      return $(tmpl);
+      return tmpl;
     }
   }
 })();  

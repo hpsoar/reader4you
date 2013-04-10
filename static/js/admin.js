@@ -61,7 +61,7 @@ $(function() {
     addToFeedList: function(feed, idx) {
       //feed['row_idx'] = idx;
       css = idx % 2 == 0 ? 'warning': 'info';
-      util.applyTmpl(view.feedRowHtml, feed).addClass(css)
+      $(util.applyTmpl(view.feedRowHtml, feed)).addClass(css)
         .children('td').eq(1)
         .after(util.applyTmpl(view.feedStateColumn, {'state':'OK'}))
         .end()

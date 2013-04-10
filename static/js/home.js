@@ -21,7 +21,7 @@ $(function() {
           $('#feed_url').val('');
         });
       },
-      itemHtml: '<div class=article_summary_view>' +
+      itemHtml: '<div class=article-summary>' +
                   '<div class=title>' + 
                       '<a class=link href=${link} >${title}</a>' +
                       '<span class=pubdate>${publish_date}</span>' +
@@ -38,12 +38,14 @@ $(function() {
         $('#feedtitle').attr('href', feed.link);
         $('#feedtitle').html(feed.feed_title);
 
+        var list = '';
         $.each(items, function(index, item) {
-          util.applyTmpl(view.itemHtml, item).appendTo(view.storyList);
+          list += util.applyTmpl(view.itemHtml, item);
         });
+        view.storyList.append(list);
       },
       pageIdx: 0,
-      pageSize: 6,
+      pageSize: 12,
       fetching: false,
       loadingError: false,
       selectedFeed: null,
@@ -52,6 +54,7 @@ $(function() {
       // TODO: extract some code to model
       getArticles: function(feed) {
         if (view.fetching) return;
+        
         view.fetching = true;
 
         $.getJSON($SCRIPT_ROOT + '/get_stories', {
@@ -112,7 +115,7 @@ $(function() {
         var storyItems = view.storyList.children('div');
         if (storyItems.length < view.pageSize) return;
         console.log(storyItems.length);
-        var checkPoint = storyItems.eq(Math.max(storyItems.length - 3, 0)).offset().top;
+        var checkPoint = storyItems.eq(Math.max(storyItems.length - view.pageSize/2, 0)).offset().top;
         var pivotal = $('#content-area').height();
         // TODO: fix bug for too short list
         if (pivotal > checkPoint) view.getArticles(view.selectedFeed);
@@ -127,6 +130,7 @@ $(function() {
 
   $('#feed_url').bind('keypress', view.keyPressed);
   $('#content-area').scroll(function(event) {
+    console.log('scroll');
     view.loadMoreStoriesIfNeeded();
   });
   view.getFeedList();
