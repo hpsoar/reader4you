@@ -32,9 +32,6 @@ def subscribe(user_id, url):
   
   sub, sub_exist = Subscription.get_or_create(user_id, feed.feed_id)
 
-  print feed
-  print sub
-
   if sub_exist:
     state = 'duplication'
     return {'state': state}

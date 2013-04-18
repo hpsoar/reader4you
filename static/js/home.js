@@ -89,10 +89,11 @@ $(function() {
       addToFeedList: function(feed) {
         $('<a>',{
           text: feed.feed_title,
-          href: feed.feed_link,
+          href: feed.feed_address,
           class: 'feedItem',
         }).appendTo($('<li>').click(function() {
           view.showFeedSelection($(this));
+          view.pageIdx = 0;
           view.getArticles(feed);
           return false;
         }).appendTo($('#feedlist')));
