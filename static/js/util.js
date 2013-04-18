@@ -3,8 +3,8 @@
   var util = global.util = {
     applyTmpl : function(tmpl, data) {
       var pattern = /\$\{([a-z,A-Z,_]*)\}/gi;
-      var keys = new Array();
-      var rkeys = new Array();
+      var keys = [];
+      var rkeys = [];
       while (match = pattern.exec(tmpl)) {
         rkeys.push(match[0]);
         keys.push(match[1]);
@@ -14,7 +14,7 @@
           tmpl = tmpl.replace(rkeys[i], data[keys[i]]);
         }
         else {
-          console.log('error:' + keys[i]);
+          console.log('tmplate error:' + keys[i] + 'not found in data');
         }
       }
       return tmpl;

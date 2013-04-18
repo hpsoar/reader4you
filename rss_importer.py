@@ -60,7 +60,7 @@ class GoogleReaderImporter(Importer):
     feed_title = item.xpath('./string[@name="title"]') and \
                           item.xpath('./string[@name="title"]')[0].text
     feed_address = item.xpath('./string[@name="id"]') and \
-                    item.xpath('./string[@name="id"]')[0].text.replace('feed/', '')
+                    item.xpath('./string[@name="id"]')[0].text.replace('feed/', '', 1)
     feed_link = item.xpath('./string[@name="htmlUrl"]') and \
                     item.xpath('./string[@name="htmlUrl"]')[0].text
     category = item.xpath('./list[@name="categories"]/object/string[@name="label"]') and \

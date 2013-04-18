@@ -48,34 +48,26 @@ $(function() {
     feedList: $('#feedlist'),
     pageSize: 1000,
     pageIdx: 0,
-    feedRowHtml: '<tr id=${feed_id}>' + 
+    feedRowHtml: '<tr id=${feed_id} >' +
       '<td class=item-check><input type=checkbox name=feed_check value=${feed_id}></td>' +
       '<td>${feed_title}</td>' +
+      '<td>${state}</td>' +
       '<td>${num_stories}</td>' +
       '<td>${num_subscribers}</td>' +
       '<td>${next_scheduled_update}</td>' +
       '<td>${last_update}</td>' +
       '<td>${oldest_story}</td>' +
       '</tr>',
-    feedStateColumn:'<td id="state">${state}</td>',
-    addToFeedList: function(feed, idx) {
-      //feed['row_idx'] = idx;
-      css = idx % 2 == 0 ? 'warning': 'info';
-      $(util.applyTmpl(view.feedRowHtml, feed)).addClass(css)
-        .children('td').eq(1)
-        .after(util.applyTmpl(view.feedStateColumn, {'state':'OK'}))
-        .end()
-        .end()
-        .appendTo(view.feedList);
-    },
     noMoreFeeds: function() {
     },
-    getStateColumn: function(feed_id) {
-    },
     displayFeeds: function(feeds, offset, noMore) {
+      var list = '';
       $.each(feeds, function(idx, feed) {
-        view.addToFeedList(feed, offset + idx);
+        feed['state'] = 'OK';
+        list += util.applyTmpl(view.feedRowHtml, feed);
       });
+      view.feedList.append(list);
+
       if (noMore) {
         console.log('no more...');
       }
