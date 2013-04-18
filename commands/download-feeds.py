@@ -4,7 +4,6 @@ import urllib2
 import urllib
 import datetime
 import os
-from models.feed import Feed
 
 def fetch(rss_url, n, out_path, options):
   try:
@@ -37,9 +36,9 @@ if __name__ == '__main__':
 
   (options, args) = parser.parse_args()
 
-  print options.quite
   if os.path.exists(options.output_path):
     if options.filename == 'db':
+      from models.feed import Feed
       urls = [feed.feed_address for feed in  Feed.get_all_feeds()]
     else: 
       try:

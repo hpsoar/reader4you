@@ -45,6 +45,8 @@ class GoogleReaderImporter(Importer):
     http = httplib2.Http()
     http = self._credential.authorize(http)
     content = http.request(sub_url)
+    print content
+    open("gr_feeds.xml", "w").write(content[1])
     feeds_xml = content and content[1]
     feeds = self._parse(feeds_xml)
 
