@@ -62,12 +62,9 @@ def get_stories():
 
   if page >= 0: offset = page * limit
 
-  state = 'ok'
-  stories = Story.get_stories_for_feed(feed_id, offset, limit)
-
   return jsonify({ 
-    'state': state, 
-    'stories': sorted(stories, key=lambda x: x.publish_date, reverse=True)
+    'state': 'ok', 
+    'stories': engine.get_stories_for_feed(feed_id, offset, limit),
     })
 
 @app.route('/reader/google_reader_authorize')

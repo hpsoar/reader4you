@@ -36,7 +36,7 @@ def subscribe(user_id, url):
     state = 'duplication'
     return {'state': state}
 
-  return { 'state': state, 'feed': feed, 'stories': Story.get_stories_for_feed(feed.feed_id) }
+  return { 'state': state, 'feed': feed, 'stories': get_stories_for_feed(feed.feed_id) }
 
 def subscribe_imported_feeds(user_id, items):
   """
@@ -64,10 +64,9 @@ def get_feedlist_for_user(user_id):
 
   return { 'state': state, 'feedlist': feedlist }
 
-def get_stories_for_feed(feed_id):
-  state = 'ok'
-  stories = Story.get_stories_for_feed(feed_id, 0, 6)
-  return { 'state': state, 'stories': sorted(stories, key=lambda x: x.publish_date, reverse=True) }
+def get_stories_for_feed(feed_id, offset=0, limit=20):
+  stories = Story.get_stories_for_feed(feed_id) 
+  return sorted(stories, key=lambda x: x.publish_date, reverse=True)[offset: limit]
 
 def fetch_history_stories(feed_ids):
   from  models.fetch_feed_history import HistoryStoryFetcher
@@ -77,3 +76,4 @@ def fetch_history_stories(feed_ids):
   fetcher.start()
   #fetcher.join()
   return { 'state':'ok', 'feed_states': states}
+

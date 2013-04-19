@@ -31,8 +31,8 @@ class Story(DBObject):
     return [cls.dict2obj(cur) for cur in db.stories.find(query)]
 
   @classmethod
-  def get_stories_for_feed(cls, feed_id, offset=0, limit=25):
-    return cls.filter({'feed_id': int(feed_id)})[offset: offset+limit]
+  def get_stories_for_feed(cls, feed_id):
+    return cls.filter({'feed_id': int(feed_id)})
 
   @classmethod
   def get_all_stories(cls):
@@ -105,7 +105,7 @@ class Feed(DBObject):
     return None
 
   @classmethod
-  def get_all_feeds(cls):
+  def get_all(cls):
     return cls.filter({})
 
   @classmethod

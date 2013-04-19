@@ -17,6 +17,7 @@ class ProcessFeed:
     if hasattr(self.fpf, 'status'):
       if self.fpf.status == 304:
         # TODO: self.feed.save_feed_history(304, "Not modified")
+        print 'no change'
         return FEED_SAME, self.feed
       
       if self.fpf.status in (302, 301):
@@ -70,12 +71,14 @@ class ProcessFeed:
     self.feed.save()
 
     # Compare new stories to existing stories, adding and updating
+    count = 0
     for e in self.fpf.entries:
       link = e.get('link') or e.get('id') or story.link
       if not link: continue
       story, exist = Story.get_or_create(self.feed.feed_id, link)
       if exist: continue
 
+      ++count
       story.summary = e.get('summary') or e.get('description') or story.summary
       story.title = e.get('title')
       story.author = e.get('author') or story.author
@@ -89,6 +92,7 @@ class ProcessFeed:
 
     self.feed.num_stories = len(Story.get_stories_for_feed(self.feed.feed_id))
     self.feed.save()
+    print 'new stories: %d' % count
 
     return FEED_OK, self.feed
 
